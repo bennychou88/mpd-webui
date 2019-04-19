@@ -2,7 +2,7 @@
 namespace Dinusha\Mpd;
 
 
-class MPDClient {
+class MpdClient {
     const OK  = 'OK';    
     const ERR = 'ACK';
     const STATE_0 = '0';
@@ -78,14 +78,20 @@ class MPDClient {
         $this->port = $port;
         $this->passwd = $passwd;
     }
+    
+    public function __destruct() {
+        if($this->connection){
+            fclose($this->connection);
+        }
+    }
 
     /**
      * Connect to MPD server
      * 
      * @return type
      */
-    public function connect(){
-        $this->connection = \stream_socket_client("tcp://$this->host:$this->port", $errno, $errstr, 30);
+    public function connect($timeout = 30){
+        $this->connection = \stream_socket_client("tcp://$this->host:$this->port", $errno, $errstr, $timeout);
         if (!$this->connection) {
             echo "$errstr ($errno)<br />\n";
             return;
@@ -118,8 +124,7 @@ class MPDClient {
         $resp = $this->send($cmdLine);
         if(empty($this->error)){
             foreach($resp as $line){
-                list($key, $value) = explode(':', $line);
-                //echo trim($key).' => '.trim($value);
+                list($key, $value) = explode(': ', $line);
                 if($assoc){
                    $out[$key] = $value; 
                 }else{
@@ -176,7 +181,7 @@ class MPDClient {
                 break;
             }
 
-            array_push($resp, $line);    
+            array_push($resp, trim($line));    
         }
 
         return $resp;
@@ -186,7 +191,13 @@ class MPDClient {
         return $this->error;
     }
     
-    public function setPlaybackSettings(array $settings){
+    /**
+     * Set playback options
+     * 
+     * @param array $settings
+     */
+    
+    public function setPlaybackOptions(array $settings){
         foreach($settings as $key => $value){
             $this->send($key.' '.$value);
             
@@ -197,6 +208,12 @@ class MPDClient {
         }
     }
     
+    /**
+     * Set the current playback play, pause etc.
+     * 
+     * @param type $cmd
+     * @param type $params
+     */
     public function setPlayback($cmd, $params = []){
         $cmdLine = $cmd." ". implode(' ', $params);
         
