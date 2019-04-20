@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <style>
-/* Show it is fixed to the top */
-body {
-  min-height: 75rem;
-  padding-top: 4.5rem;
-}
+    /* Show it is fixed to the top */
+    body {
+      min-height: 75rem;
+      padding-top: 4.5rem;
+    }
     </style>
 
     <title>Hello, world!</title>
@@ -63,6 +63,29 @@ body {
             </div>
             </div>
         </div>
+        <div class="col">
+          <div class="card mx-auto">
+            <div class="card-header">
+            Add file uri
+            </div>
+            <div class="card-body">
+                <form>
+                <div class="form-group">
+                  <label for="">URI</label>
+                  <textarea class="form-control" id="fileURI" rows="3"></textarea>
+                </div>
+                <button type="button" id="addToQueue" class="btn btn-primary">Add</button>
+              </form>
+              <form class="form-inline">
+                <div class="form-group mb-2">
+                  <label for="removeSong" class="sr-only">Song POS</label>
+                  <input type="text" class="form-control-plaintext" id="removeSongId">
+                </div>
+                <button type="button" id="removeSong" class="btn btn-primary mb-2">Remove</button>
+            </form>
+            </div>
+            </div>
+        </div>
     </div>
     </main>
     <!--<div class="container-fluid fixed-bottom">
@@ -98,18 +121,42 @@ body {
         $('#playStop').on('click', function(e){
             $.getJSON('player/stop');
         });
+        
+        $('#addToQueue').on('click', function(e){
+            var uri = $('#fileURI').val();
+            
+            $.getJSON('player/queueAdd', {uri: uri}, function(data){
+                alert("Id = " + data[0].Id);
+                $('#fileURI').val('');
+            });
+        });
+        $('#removeSong').on('click', function(e){
+            var id = $('#removeSongId').val();
+            
+            $.getJSON('player/queueDelOne', {id: id}, function(data){
+                $('#removeSongId').val('');
+            });
+        });
     });
     
     function getQueue(){
+        $('#playQueue').hide();
         $('#playQueue').empty();
         $.getJSON('player/queue', function(resp){
             //alert(resp);
             for(var i=0;i<resp.length;i++){
-                $('#playQueue').append('<li>'+resp[i]+'</li>');
+//                if($('#queue_'+(i+1)).length){
+//                    alert('Found');
+//                }else{
+//                    $('#playQueue').append('<li id="queue_'+(i + 1)+'">'+resp[i]+'</li>');
+//                }
+                $('#playQueue').append('<li id="queue_'+(i + 1)+'">'+resp[i]+'</li>');
             }
+            $('#playQueue').show();
         });
     }
     function getStatus(){
+        $('#playStatus').hide("slow");
         $('#playStatus').empty();
         $.getJSON('player/status', function(resp){
             $.each(resp, function(key, value){
@@ -117,7 +164,7 @@ body {
                     $('#playStatus').append('<li>'+key+' : '+value+'</li>');
                 });
             });
-            
+            $('#playStatus').show();
         });
     }
     </script>

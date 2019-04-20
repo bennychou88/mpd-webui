@@ -8,7 +8,7 @@ class Player {
     private $mpdClient;
     
     public function __construct() {
-        $this->mpdClient = new MpdClient('192.168.0.6', '6600');
+        $this->mpdClient = new MpdClient('192.168.0.5', '6600');
         $this->mpdClient->connect();
     }
     
@@ -54,5 +54,17 @@ class Player {
                 array_push($files, $value['file']);
         }
         echo json_encode($files);
+    }
+    
+    public function queueAdd(){
+        $uri = trim($_GET['uri']);
+        $resp = $this->mpdClient->sendCommand('addid', [$uri]);
+        echo json_encode($resp);
+    }
+    
+    public function queueDelOne(){
+        $id = trim($_GET['id']);
+        $resp = $this->mpdClient->sendCommand('deleteid', [$id]);
+        echo json_encode($resp);
     }
 }

@@ -119,7 +119,8 @@ class MpdClient {
     
     public function sendCommand($cmd, $params = [], $assoc = false){
         $out = [];
-        $cmdLine = $cmd." ". implode(' ', $params);
+        $cmdLine = $cmd;
+        $cmdLine .= (count($params) > 0)?' "'. implode('" "', $params).'"':'';
         
         $resp = $this->send($cmdLine);
         if(empty($this->error)){
